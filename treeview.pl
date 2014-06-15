@@ -15,15 +15,14 @@ my $first   = "\x{252c}";
 
 my $json;
 $json  = get_input();
-parse_level(0, $new, $json);
+foreach my $thread (@$json) {
+    parse_level(0, $new, @$thread[0]);
+}
 
 sub get_input {
     my $text;
     while(<STDIN>) {
         $text = "$text$_";
-    }
-    if($text =~ m/\[\[(.*)\]\]/) {
-        $text = $1;
     }
     return decode_json($text);
 }
