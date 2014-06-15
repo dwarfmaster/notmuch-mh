@@ -15,7 +15,7 @@ my $first   = "\x{252c}";
 
 my $json;
 $json  = get_input();
-parse_level($barvert, 0, $new, $json);
+parse_level(0, $new, $json);
 
 sub get_input {
     my $text;
@@ -29,12 +29,12 @@ sub get_input {
 }
 
 sub parse_level {
-    my ($symb,$dec,$lnew,$json) = @_;
+    my ($dec,$lnew,$json,@symbs) = @_;
     my ($mail,$from,$to,@subs) = parse_headers($json);
 
     my $i;
     for($i = 0; $i < $dec - 1; ++$i) {
-        print "$symb";
+        print "$symbs[$i]";
     }
     print "$lnew" if $dec >= 1;
     if(scalar(@subs) > 0) {
@@ -44,10 +44,12 @@ sub parse_level {
     }
     print "$from -> $to { $mail }\n";
 
+    push @symbs, $barvert;
     for($i = 0; $i < scalar(@subs) - 1; ++$i) {
-        parse_level($symb,$dec+1,$new,$subs[$i]);
+        parse_level($dec+1,$new,$subs[$i],@symbs);
     }
-    parse_level(" ",$dec+1,$angle,$subs[-1]) if scalar(@subs) > 0;
+    $symbs[-1] = " ";
+    parse_level($dec+1,$angle,$subs[-1],@symbs) if scalar(@subs) > 0;
 }
 
 sub parse_headers {
