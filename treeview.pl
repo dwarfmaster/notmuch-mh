@@ -42,7 +42,7 @@ sub parse_level {
     } else {
         print "$barhori";
     }
-    print "$from -> $to { $mail }\n";
+    print ">$from -> $to { $mail }\n";
 
     push @symbs, $barvert;
     for($i = 0; $i < scalar(@subs) - 1; ++$i) {
