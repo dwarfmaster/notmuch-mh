@@ -11,6 +11,7 @@ my $barvert = "\x{2502}";
 my $barhori = "\x{2500}";
 my $angle   = "\x{2514}";
 my $new     = "\x{251c}";
+my $first   = "\x{252c}";
 
 my $json;
 $json  = get_input();
@@ -36,6 +37,11 @@ sub parse_level {
         print "$symb";
     }
     print "$lnew" if $dec >= 1;
+    if(scalar(@subs) > 0) {
+        print "$first";
+    } else {
+        print "$barhori";
+    }
     print "$from -> $to { $mail }\n";
 
     for($i = 0; $i < scalar(@subs) - 1; ++$i) {
