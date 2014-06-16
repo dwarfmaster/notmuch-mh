@@ -12,12 +12,15 @@ my $barhori = "\x{2500}";
 my $angle   = "\x{2514}";
 my $new     = "\x{251c}";
 my $first   = "\x{252c}";
+
+# Config
 my $spaces  = 1;
+my $dup     = !0;
 
 my $json;
 $json  = get_input();
 foreach my $thread (@$json) {
-    parse_level(0, $new, @$thread[0]);
+    parse_level(0, $new, "", @$thread[0]);
 }
 
 sub get_input {
@@ -29,7 +32,7 @@ sub get_input {
 }
 
 sub parse_level {
-    my ($dec,$lnew,$json,@symbs) = @_;
+    my ($dec,$lnew,$prev,$json,@symbs) = @_;
     my ($mail,$from,$to,@subs) = parse_headers($json);
 
     my $i;
@@ -51,14 +54,18 @@ sub parse_level {
     } else {
         print "$barhori";
     }
-    print ">$mail [$from]\n";
+    if(not $dup and $mail eq $prev) {
+        print "> [$from]\n";
+    } else {
+        print ">$mail [$from]\n";
+    }
 
     push @symbs, $barvert;
     for($i = 0; $i < scalar(@subs) - 1; ++$i) {
-        parse_level($dec+1,$new,$subs[$i],@symbs);
+        parse_level($dec+1,$new,$mail,$subs[$i],@symbs);
     }
     $symbs[-1] = " ";
-    parse_level($dec+1,$angle,$subs[-1],@symbs) if scalar(@subs) > 0;
+    parse_level($dec+1,$angle,$mail,$subs[-1],@symbs) if scalar(@subs) > 0;
 }
 
 sub parse_headers {
