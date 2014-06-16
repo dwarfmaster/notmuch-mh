@@ -74,7 +74,10 @@ sub parse_level {
     } else {
         print "$barhori";
     }
-    if(not $dup and $mail eq $prev) {
+
+    my $subject = $mail->{"headers"}{"Subject"};
+    $subject = strip_re($subject) if $stripre;
+    if(not $dup and $subject eq $prev) {
         print "> ";
         print_string($mail, !1);
     } else {
@@ -84,10 +87,10 @@ sub parse_level {
 
     push @symbs, $barvert;
     for($i = 0; $i < scalar(@subs) - 1; ++$i) {
-        parse_level($dec+1,$new,$mail,$subs[$i],@symbs);
+        parse_level($dec+1,$new,$subject,$subs[$i],@symbs);
     }
     $symbs[-1] = " ";
-    parse_level($dec+1,$angle,$mail,$subs[-1],@symbs) if scalar(@subs) > 0;
+    parse_level($dec+1,$angle,$subject,$subs[-1],@symbs) if scalar(@subs) > 0;
 }
 
 sub parse_headers {
