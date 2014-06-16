@@ -19,11 +19,12 @@ my $first   = "\x{252c}";
 
 # Config
 my %opts;
-getopt("s", \%opts);
+getopt("Ds", \%opts);
 my $spaces  = $opts{"s"};
 $spaces = 1 if not $spaces;
 my $dup     = $opts{"d"};
 my $stripre = $opts{"r"};
+my $mdepth  = $opts{'D'};
 
 my $json;
 $json  = get_input();
@@ -41,6 +42,7 @@ sub get_input {
 
 sub parse_level {
     my ($dec,$lnew,$prev,$json,@symbs) = @_;
+    return if $mdepth and $dec >= $mdepth;
     my ($mail,$from,$to,@subs) = parse_headers($json);
 
     my $i;
