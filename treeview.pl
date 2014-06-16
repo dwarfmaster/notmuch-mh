@@ -76,10 +76,8 @@ sub parse_level {
         print "$barhori";
     }
 
-    my $subject = $mail->{"headers"}{"Subject"};
-    $subject = strip_re($subject) if $stripre;
     print "$arrow ";
-    print_string($mail, ($dup or $subject ne $prev));
+    my $subject = print_string($mail, $prev);
 
     push @symbs, $barvert;
     for($i = 0; $i < scalar(@subs) - 1; ++$i) {
@@ -108,7 +106,7 @@ sub strip_re {
 }
 
 sub print_string {
-    my ($mail,$sj) = @_;
+    my ($mail,$prev) = @_;
     my $text = $format;
 
     my $tags = "";
@@ -123,8 +121,11 @@ sub print_string {
     $text =~ s/([^\\])%tt/$1$mail->{timestamp}/g;
     $text =~ s/([^\\])%tg/$1$tags/g;
     $text =~ s/([^\\])%fl/$1$mail->{filename}/g;
-    if($sj) {
-        $text =~ s/([^\\])%sj/$1$mail->{headers}{Subject}/g;
+
+    my $subject = $mail->{headers}{Subject};
+    $subject = strip_re($subject) if $stripre;
+    if($dup or $subject ne $prev) {
+        $text =~ s/([^\\])%sj/$1$subject/g;
     } else {
         $text =~ s/([^\\])%sj/$1/g;
     }
@@ -136,6 +137,8 @@ sub print_string {
         print colored [$1], $2;
     }
     print "\n";
+
+    return $subject;
 }
 
 
