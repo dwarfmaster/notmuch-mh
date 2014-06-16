@@ -12,13 +12,15 @@ binmode(STDOUT, ":utf8");
 
 # Config
 my %opts;
-getopt("Ds", \%opts);
+getopt("Dsf", \%opts);
 my $spaces  = $opts{"s"};
 $spaces = 1 if not $spaces;
 my $dup     = $opts{"d"};
 my $stripre = $opts{"r"};
-my $mdepth  = $opts{'D'};
-my $ascii   = $opts{'A'};
+my $mdepth  = $opts{"D"};
+my $ascii   = $opts{"A"};
+my $format  = $opts{"f"};
+$format = "%{bold cyan}%sj %{green}[%fr]" if not $format;
 
 # String to draw
 my $barvert = "|";
@@ -51,7 +53,7 @@ sub get_input {
 sub parse_level {
     my ($dec,$lnew,$prev,$json,@symbs) = @_;
     return if $mdepth and $dec >= $mdepth;
-    my ($mail,$from,$to,@subs) = parse_headers($json);
+    my ($mail,@subs) = parse_headers($json);
 
     my $i;
     for($i = 0; $i < $dec - 1; ++$i) {
@@ -74,11 +76,10 @@ sub parse_level {
     }
     if(not $dup and $mail eq $prev) {
         print "> ";
-        print colored ['green'], "[$from]\n";
+        print_string($mail, !1);
     } else {
         print ">";
-        print colored ['bold cyan'], "$mail";
-        print colored ['green'], " [$from]\n";
+        print_string($mail, !0);
     }
 
     push @symbs, $barvert;
@@ -93,13 +94,10 @@ sub parse_headers {
     my ($json) = @_;
     my $item = @$json[0];
 
-    my $mail = $item->{'headers'}{'Subject'};
-    $mail = strip_re($mail) if $stripre;
-    my $from = $item->{'headers'}{'From'};
-    my $to   = $item->{'headers'}{'To'};
+    my $mail = $item;
     my $subs = @$json[1];
 
-    return ($mail, $from, $to, @$subs);
+    return ($mail, @$subs);
 }
 
 sub strip_re {
@@ -109,5 +107,37 @@ sub strip_re {
     }
     return $mail;
 }
+
+sub print_string {
+    my ($mail,$sj) = @_;
+    my $text = $format;
+
+    my $tags = "";
+    foreach my $tag ($mail->{tags}) {
+        $tags = "$tags $tag";
+    }
+    $text =~ s/([^\\])%to/$1$mail->{headers}{To}/g;
+    $text =~ s/([^\\])%fr/$1$mail->{headers}{From}/g;
+    $text =~ s/([^\\])%cc/$1$mail->{headers}{Cc}/g;
+    $text =~ s/([^\\])%dt/$1$mail->{headers}{Date}/g;
+    $text =~ s/([^\\])%rt/$1$mail->{date_relative}/g;
+    $text =~ s/([^\\])%tt/$1$mail->{timestamp}/g;
+    $text =~ s/([^\\])%tg/$1$tags/g;
+    $text =~ s/([^\\])%fl/$1$mail->{filename}/g;
+    if($sj) {
+        $text =~ s/([^\\])%sj/$1$mail->{headers}{Subject}/g;
+    } else {
+        $text =~ s/([^\\])%sj/$1/g;
+    }
+    $text =~ s/\\%/%/g;
+
+    my @parts = split /%{/, $text;
+    foreach my $part (@parts) {
+        next if $part !~ m/^(.*)}(.*)$/;
+        print colored [$1], $2;
+    }
+    print "\n";
+}
+
 
 
