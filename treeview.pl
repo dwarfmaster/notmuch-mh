@@ -10,13 +10,6 @@ use utf8;
 $Term::ANSIColor::AUTORESET=1;
 binmode(STDOUT, ":utf8");
 
-# String to draw
-my $barvert = "\x{2502}";
-my $barhori = "\x{2500}";
-my $angle   = "\x{2514}";
-my $new     = "\x{251c}";
-my $first   = "\x{252c}";
-
 # Config
 my %opts;
 getopt("Ds", \%opts);
@@ -25,6 +18,21 @@ $spaces = 1 if not $spaces;
 my $dup     = $opts{"d"};
 my $stripre = $opts{"r"};
 my $mdepth  = $opts{'D'};
+my $ascii   = $opts{'A'};
+
+# String to draw
+my $barvert = "|";
+my $barhori = "-";
+my $angle   = "\\";
+my $new     = "|";
+my $first   = "+";
+if(not $ascii) {
+    $barvert = "\x{2502}";
+    $barhori = "\x{2500}";
+    $angle   = "\x{2514}";
+    $new     = "\x{251c}";
+    $first   = "\x{252c}";
+}
 
 my $json;
 $json  = get_input();
