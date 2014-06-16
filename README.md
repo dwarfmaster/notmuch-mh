@@ -9,3 +9,5 @@ Here is a list of scripts :
                  with json output to this script to
                  get a threaded list of mails.
 
+It requires JSON and Getopt::LL perl modules.
+
