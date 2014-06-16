@@ -11,5 +11,6 @@ Here is a list of scripts :
    duplicated subjects) and -s (number of spaces
    when identing) arguments.
 
-It requires JSON and Getopt::Std perl modules.
+It requires JSON, Getopt::Std and Term::ANSIColor
+perl modules.
 

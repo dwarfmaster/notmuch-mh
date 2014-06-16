@@ -4,8 +4,11 @@ use strict;
 use warnings;
 use JSON qw(decode_json);
 use Getopt::Std;
-binmode(STDOUT, ":utf8");
+use Term::ANSIColor;
 use utf8;
+
+$Term::ANSIColor::AUTORESET=1;
+binmode(STDOUT, ":utf8");
 
 # String to draw
 my $barvert = "\x{2502}";
@@ -60,9 +63,12 @@ sub parse_level {
         print "$barhori";
     }
     if(not $dup and $mail eq $prev) {
-        print "> [$from]\n";
+        print "> ";
+        print colored ['green'], "[$from]\n";
     } else {
-        print ">$mail [$from]\n";
+        print ">";
+        print colored ['bold cyan'], "$mail";
+        print colored ['green'], " [$from]\n";
     }
 
     push @symbs, $barvert;
