@@ -15,7 +15,8 @@ my $first   = "\x{252c}";
 
 # Config
 my $spaces  = 1;
-my $dup     = !0;
+my $dup     = !1;
+my $stripre = !0;
 
 my $json;
 $json  = get_input();
@@ -73,11 +74,20 @@ sub parse_headers {
     my $item = @$json[0];
 
     my $mail = $item->{'headers'}{'Subject'};
+    $mail = strip_re($mail) if $stripre;
     my $from = $item->{'headers'}{'From'};
     my $to   = $item->{'headers'}{'To'};
     my $subs = @$json[1];
 
     return ($mail, $from, $to, @$subs);
+}
+
+sub strip_re {
+    my ($mail) = @_;
+    while($mail =~ m/^Re: (.*)$/ or $mail =~ m/^Re:(.*)$/) {
+        $mail = $1;
+    }
+    return $mail;
 }
 
 
