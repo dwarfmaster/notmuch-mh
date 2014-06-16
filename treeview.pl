@@ -2,13 +2,11 @@
 
 use strict;
 use warnings;
+use utf8;
 use JSON qw(decode_json);
 use Getopt::Std;
 use Term::ANSIColor;
-use utf8;
-
 $Term::ANSIColor::AUTORESET=1;
-binmode(STDOUT, ":utf8");
 
 # Config
 my %opts;
@@ -34,6 +32,7 @@ if(not $ascii) {
     $angle   = "\x{2514}";
     $new     = "\x{251c}";
     $first   = "\x{252c}";
+    binmode(STDOUT, ":utf8");
 }
 
 my $json;
