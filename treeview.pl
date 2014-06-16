@@ -12,6 +12,7 @@ my $barhori = "\x{2500}";
 my $angle   = "\x{2514}";
 my $new     = "\x{251c}";
 my $first   = "\x{252c}";
+my $spaces  = 1;
 
 my $json;
 $json  = get_input();
@@ -34,8 +35,17 @@ sub parse_level {
     my $i;
     for($i = 0; $i < $dec - 1; ++$i) {
         print "$symbs[$i]";
+        for(my $j = 0; $j < $spaces; ++$j) {
+            print " ";
+        }
     }
+
     print "$lnew" if $dec >= 1;
+    if(scalar(@symbs) > 0) {
+        for(my $j = 0; $j < $spaces; ++$j) {
+            print "$barhori";
+        }
+    }
     if(scalar(@subs) > 0) {
         print "$first";
     } else {
