@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use JSON qw(decode_json);
+use Getopt::Std;
 binmode(STDOUT, ":utf8");
 use utf8;
 
@@ -14,9 +15,12 @@ my $new     = "\x{251c}";
 my $first   = "\x{252c}";
 
 # Config
-my $spaces  = 1;
-my $dup     = !1;
-my $stripre = !0;
+my %opts;
+getopt("s", \%opts);
+my $spaces  = $opts{"s"};
+$spaces = 1 if not $spaces;
+my $dup     = $opts{"d"};
+my $stripre = $opts{"r"};
 
 my $json;
 $json  = get_input();
