@@ -26,12 +26,14 @@ my $barhori = "-";
 my $angle   = "\\";
 my $new     = "|";
 my $first   = "+";
+my $arrow   = ">";
 if(not $ascii) {
     $barvert = "\x{2502}";
     $barhori = "\x{2500}";
     $angle   = "\x{2514}";
     $new     = "\x{251c}";
     $first   = "\x{252c}";
+    $arrow   = "\x{25b6}";
     binmode(STDOUT, ":utf8");
 }
 
@@ -76,13 +78,8 @@ sub parse_level {
 
     my $subject = $mail->{"headers"}{"Subject"};
     $subject = strip_re($subject) if $stripre;
-    if(not $dup and $subject eq $prev) {
-        print "> ";
-        print_string($mail, !1);
-    } else {
-        print ">";
-        print_string($mail, !0);
-    }
+    print "$arrow ";
+    print_string($mail, ($dup or $subject ne $prev));
 
     push @symbs, $barvert;
     for($i = 0; $i < scalar(@subs) - 1; ++$i) {
