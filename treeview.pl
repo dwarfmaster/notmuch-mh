@@ -18,7 +18,7 @@ my $stripre = $opts{"r"};
 my $mdepth  = $opts{"D"};
 my $ascii   = $opts{"A"};
 my $format  = $opts{"f"};
-$format = "%{bold cyan}%sj %{green}[%fr]" if not $format;
+$format = "%{bold cyan}%sj %{green}[%fr] %{red}[%tg]" if not $format;
 
 # String to draw
 my $barvert = "|";
@@ -38,7 +38,7 @@ if(not $ascii) {
 }
 
 my $json;
-$json  = get_input();
+$json = get_input();
 foreach my $thread (@$json) {
     parse_level(0, $new, "", @$thread[0]);
 }
@@ -110,8 +110,14 @@ sub print_string {
     my $text = $format;
 
     my $tags = "";
-    foreach my $tag ($mail->{tags}) {
-        $tags = "$tags $tag";
+    my $tagref = $mail->{tags};
+    my @taglist = @$tagref;
+    foreach my $tag (@taglist) {
+        if($tags ne "") {
+            $tags = "$tags $tag";
+        } else {
+            $tags = $tag;
+        }
     }
     $text =~ s/([^\\])%to/$1$mail->{headers}{To}/g;
     $text =~ s/([^\\])%fr/$1$mail->{headers}{From}/g;
