@@ -16,6 +16,7 @@ static const char* symbols[] = {
     "|",  /* New branch.     */
     "+",  /* New sub-branch. */
     ">",  /* Arrow.          */
+    " ",  /* Empty.          */
 };
 
 static void die(const char* fmt, ...)
@@ -53,7 +54,7 @@ static const char* print_line(notmuch_message_t* msg, const char* prevsubj)
         tags[QUERY_LENGTH - length - 1] = '\0';
 
     if(strcmp(subject, prevsubj) == 0)
-        printf(" \x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", subject, from, tags);
+        printf(" \x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", from, tags);
     else
         printf("\x1b[36m\x1b[1m%s \x1b[0m\x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", subject, from, tags);
     return subject;
@@ -63,6 +64,7 @@ static void print_message(notmuch_message_t* msg, int new,
         int symbs[MAX_DEPTH], size_t dec, const char* prevsubj)
 {
     size_t i, j;
+    int cont;
     const char* subject;
     notmuch_messages_t* subs;
     subs = notmuch_message_get_replies(msg);
@@ -87,11 +89,18 @@ static void print_message(notmuch_message_t* msg, int new,
     printf("%s", symbols[5]);
     subject = print_line(msg, prevsubj);
     
-    /* TODO Handle last. */
     symbs[dec] = 0;
-    for(;   notmuch_messages_valid(subs);
-            notmuch_messages_move_to_next(subs)) {
+    cont = 1;
+    if(!notmuch_messages_valid(subs))
+        cont = 0;
+
+    while(cont) {
         msg = notmuch_messages_get(subs);
+        notmuch_messages_move_to_next(subs);
+        if(!notmuch_messages_valid(subs)) {
+            cont = 0;
+            symbs[dec] = 6;
+        }
         print_message(msg, 4, symbs, dec + 1, subject);
     }
 
