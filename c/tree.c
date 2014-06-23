@@ -7,7 +7,7 @@
 
 #define QUERY_LENGTH 256
 #define MAX_DEPTH    256
-#define COLUMN_WIDTH   2
+#define COLUMN_WIDTH   0
 
 static const char* symbols[] = {
     "\xe2\x94\x82", /* Vertical bar.   */
@@ -91,7 +91,7 @@ static void print_message(notmuch_message_t* msg, int new,
     
     symbs[dec] = 0;
     cont = 1;
-    next = 0;
+    next = 3;
     if(!notmuch_messages_valid(subs))
         cont = 0;
 
