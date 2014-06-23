@@ -7,7 +7,16 @@
 
 #define QUERY_LENGTH 256
 #define MAX_DEPTH    256
-#define COLUMN_WIDTH   4
+#define COLUMN_WIDTH   2
+
+static const char* symbols[] = {
+    "|",  /* Vertical bar.   */
+    "-",  /* Horizontal bar. */
+    "\\", /* Angle.          */
+    "|",  /* New branch.     */
+    "+",  /* New sub-branch. */
+    ">",  /* Arrow.          */
+};
 
 static void die(const char* fmt, ...)
 {
@@ -18,21 +27,62 @@ static void die(const char* fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-static void print_messages(notmuch_messages_t* msgs,
-        char symbols[MAX_DEPTH], size_t dec)
+static void print_line(notmuch_message_t* msg)
 {
     /* TODO */
+    printf("A message\n");
+}
+
+static void print_message(notmuch_message_t* msg, int new,
+        int symbs[MAX_DEPTH], size_t dec)
+{
+    size_t i, j;
+    notmuch_messages_t* subs;
+    subs = notmuch_message_get_replies(msg);
+
+    for(i = 0; dec > 0 && i < dec - 1; ++i) {
+        printf("%s", symbols[symbs[i]]);
+        for(j = 0; j < COLUMN_WIDTH; ++j)
+            printf(" ");
+    }
+    
+    if(dec >= 1) {
+        printf("%s", symbols[new]);
+        for(j = 0; j < COLUMN_WIDTH; ++j)
+            printf("%s", symbols[1]);
+    }
+
+    if(subs)
+        printf("%s", symbols[4]);
+    else
+        printf("%s", symbols[1]);
+
+    printf("%s", symbols[5]);
+    print_line(msg);
+
+    /* TODO Handle last. */
+    symbs[dec] = 0;
+    for(;   notmuch_messages_valid(subs);
+            notmuch_messages_move_to_next(subs)) {
+        msg = notmuch_messages_get(subs);
+        print_message(msg, 4, symbs, dec + 1);
+    }
+
+    notmuch_messages_destroy(subs);
 }
 
 static void print_thread(notmuch_thread_t* th)
 {
     notmuch_messages_t* msgs;
-    char symbols[MAX_DEPTH];
+    notmuch_message_t* msg;
+    int symbs[MAX_DEPTH];
 
-    printf("thread:%s (%i)\n", notmuch_thread_get_thread_id(th),
-            notmuch_thread_get_total_messages(th));
-    msgs = notmuch_thread_get_toplevel_messages(th);
-    print_messages(msgs, symbols, 0);
+    for(msgs = notmuch_thread_get_toplevel_messages(th);
+            notmuch_messages_valid(msgs);
+            notmuch_messages_move_to_next(msgs)) {
+        msg = notmuch_messages_get(msgs);
+        print_message(msg, 4, symbs, 0);
+    }
     notmuch_messages_destroy(msgs);
 }
 
