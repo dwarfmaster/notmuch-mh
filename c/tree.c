@@ -27,10 +27,12 @@ static void die(const char* fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-static void print_line(notmuch_message_t* msg)
+static const char* print_line(notmuch_message_t* msg, const char* prevsubj)
 {
     const char* subject = notmuch_message_get_header(msg, "Subject");
     const char* from    = notmuch_message_get_header(msg, "From");
+    if(strlen(subject) > 4 && memcmp(subject, "Re: ", 4) == 0)
+        subject += 4;
 
     char tags [QUERY_LENGTH];
     const char* tag;
@@ -50,13 +52,18 @@ static void print_line(notmuch_message_t* msg)
     if(length < QUERY_LENGTH)
         tags[QUERY_LENGTH - length - 1] = '\0';
 
-    printf("\x1b[36m\x1b[1m%s \x1b[0m\x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", subject, from, tags);
+    if(strcmp(subject, prevsubj) == 0)
+        printf(" \x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", subject, from, tags);
+    else
+        printf("\x1b[36m\x1b[1m%s \x1b[0m\x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", subject, from, tags);
+    return subject;
 }
 
 static void print_message(notmuch_message_t* msg, int new,
-        int symbs[MAX_DEPTH], size_t dec)
+        int symbs[MAX_DEPTH], size_t dec, const char* prevsubj)
 {
     size_t i, j;
+    const char* subject;
     notmuch_messages_t* subs;
     subs = notmuch_message_get_replies(msg);
 
@@ -78,14 +85,14 @@ static void print_message(notmuch_message_t* msg, int new,
         printf("%s", symbols[1]);
 
     printf("%s", symbols[5]);
-    print_line(msg);
-
+    subject = print_line(msg, prevsubj);
+    
     /* TODO Handle last. */
     symbs[dec] = 0;
     for(;   notmuch_messages_valid(subs);
             notmuch_messages_move_to_next(subs)) {
         msg = notmuch_messages_get(subs);
-        print_message(msg, 4, symbs, dec + 1);
+        print_message(msg, 4, symbs, dec + 1, subject);
     }
 
     notmuch_messages_destroy(subs);
@@ -101,7 +108,7 @@ static void print_thread(notmuch_thread_t* th)
             notmuch_messages_valid(msgs);
             notmuch_messages_move_to_next(msgs)) {
         msg = notmuch_messages_get(msgs);
-        print_message(msg, 4, symbs, 0);
+        print_message(msg, 4, symbs, 0, "");
     }
     notmuch_messages_destroy(msgs);
 }
