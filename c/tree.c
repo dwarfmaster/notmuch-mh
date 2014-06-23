@@ -29,8 +29,28 @@ static void die(const char* fmt, ...)
 
 static void print_line(notmuch_message_t* msg)
 {
-    /* TODO */
-    printf("A message\n");
+    const char* subject = notmuch_message_get_header(msg, "Subject");
+    const char* from    = notmuch_message_get_header(msg, "From");
+
+    char tags [QUERY_LENGTH];
+    const char* tag;
+    size_t length = QUERY_LENGTH;
+    notmuch_tags_t* tgs;
+    tags[0] = '\0';
+
+    for(tgs = notmuch_message_get_tags(msg);
+            notmuch_tags_valid(tgs);
+            notmuch_tags_move_to_next(tgs)) {
+        tag = notmuch_tags_get(tgs);
+        strncat(tags, tag, length);
+        length -= strlen(tag);
+        strncat(tags, " ", length);
+        length -= 1;
+    }
+    if(length < QUERY_LENGTH)
+        tags[QUERY_LENGTH - length - 1] = '\0';
+
+    printf("%s [%s] [%s]\n", subject, from, tags);
 }
 
 static void print_message(notmuch_message_t* msg, int new,
