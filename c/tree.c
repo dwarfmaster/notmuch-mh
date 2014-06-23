@@ -10,13 +10,13 @@
 #define COLUMN_WIDTH   2
 
 static const char* symbols[] = {
-    "|",  /* Vertical bar.   */
-    "-",  /* Horizontal bar. */
-    "\\", /* Angle.          */
-    "|",  /* New branch.     */
-    "+",  /* New sub-branch. */
-    ">",  /* Arrow.          */
-    " ",  /* Empty.          */
+    "\xe2\x94\x82", /* Vertical bar.   */
+    "\xe2\x94\x80", /* Horizontal bar. */
+    "\xe2\x94\x94", /* Angle.          */
+    "\xe2\x94\x9c", /* New branch.     */
+    "\xe2\x94\xac", /* New sub-branch. */
+    ">",            /* Arrow.          */
+    " ",            /* Empty.          */
 };
 
 static void die(const char* fmt, ...)
