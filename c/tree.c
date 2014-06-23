@@ -50,7 +50,7 @@ static void print_line(notmuch_message_t* msg)
     if(length < QUERY_LENGTH)
         tags[QUERY_LENGTH - length - 1] = '\0';
 
-    printf("%s [%s] [%s]\n", subject, from, tags);
+    printf("\x1b[36m\x1b[1m%s \x1b[0m\x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", subject, from, tags);
 }
 
 static void print_message(notmuch_message_t* msg, int new,
