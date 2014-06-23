@@ -64,7 +64,7 @@ static void print_message(notmuch_message_t* msg, int new,
         int symbs[MAX_DEPTH], size_t dec, const char* prevsubj)
 {
     size_t i, j;
-    int cont;
+    int cont, next;
     const char* subject;
     notmuch_messages_t* subs;
     subs = notmuch_message_get_replies(msg);
@@ -91,6 +91,7 @@ static void print_message(notmuch_message_t* msg, int new,
     
     symbs[dec] = 0;
     cont = 1;
+    next = 0;
     if(!notmuch_messages_valid(subs))
         cont = 0;
 
@@ -100,8 +101,9 @@ static void print_message(notmuch_message_t* msg, int new,
         if(!notmuch_messages_valid(subs)) {
             cont = 0;
             symbs[dec] = 6;
+            next = 2;
         }
-        print_message(msg, 4, symbs, dec + 1, subject);
+        print_message(msg, next, symbs, dec + 1, subject);
     }
 
     notmuch_messages_destroy(subs);
