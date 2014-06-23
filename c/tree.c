@@ -6,6 +6,8 @@
 #include <notmuch.h>
 
 #define QUERY_LENGTH 256
+#define MAX_DEPTH    256
+#define COLUMN_WIDTH   4
 
 static void die(const char* fmt, ...)
 {
@@ -16,11 +18,22 @@ static void die(const char* fmt, ...)
     exit(EXIT_FAILURE);
 }
 
+static void print_messages(notmuch_messages_t* msgs,
+        char symbols[MAX_DEPTH], size_t dec)
+{
+    /* TODO */
+}
+
 static void print_thread(notmuch_thread_t* th)
 {
+    notmuch_messages_t* msgs;
+    char symbols[MAX_DEPTH];
+
     printf("thread:%s (%i)\n", notmuch_thread_get_thread_id(th),
             notmuch_thread_get_total_messages(th));
-    /* TODO */
+    msgs = notmuch_thread_get_toplevel_messages(th);
+    print_messages(msgs, symbols, 0);
+    notmuch_messages_destroy(msgs);
 }
 
 int main(int argc, char *argv[])
