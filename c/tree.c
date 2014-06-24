@@ -18,6 +18,7 @@ static const char* symbols[] = {
     "\xe2\x94\xac", /* New sub-branch. */
     ">",            /* Arrow.          */
     " ",            /* Empty.          */
+    "\xe2\x97\x8f", /* Filled circle.  */
 };
 
 static void die(const char* fmt, ...)
@@ -97,6 +98,13 @@ static void print_message(notmuch_message_t* msg, int new,
         if(opts_as_bool("mid"))
             printf("%s\t", notmuch_message_get_message_id(msg));
 
+        if(opts_as_bool("hlmatch")) {
+            if(notmuch_message_get_flag(msg, NOTMUCH_MESSAGE_FLAG_MATCH))
+                printf("%s", symbols[7]);
+            else
+                printf(" ");
+        }
+
         for(i = 0; dec > 0 && i < dec - 1; ++i) {
             printf("%s", symbols[symbs[i]]);
             for(j = 0; j < COLUMN_WIDTH; ++j)
@@ -167,6 +175,7 @@ static void set_options()
         {"format",  0, 1},
         {"mid",     0, 0},
         {"matched", 0, 0},
+        {"hlmatch", 0, 0},
         {NULL,      0, 0}
     };
     opts_set(opts);
