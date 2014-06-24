@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <notmuch.h>
+#include "opts.h"
 
 #define QUERY_LENGTH 256
 #define MAX_DEPTH    256
@@ -124,9 +125,21 @@ static void print_thread(notmuch_thread_t* th)
     notmuch_messages_destroy(msgs);
 }
 
+static void set_options()
+{
+    option_t opts[] = {
+        {"maildir", 0, 1},
+        {"format",  0, 1},
+        {"mid",     0, 0},
+        {NULL,      0, 0}
+    };
+    opts_set(opts);
+}
+
 int main(int argc, char *argv[])
 {
     const char* maildir;
+    const char* str;
     char query_str[QUERY_LENGTH];
     size_t length;
     int i;
@@ -136,22 +149,27 @@ int main(int argc, char *argv[])
     notmuch_threads_t* threads;
     notmuch_thread_t* thread;
 
+    /* Handling command line options. */
+    set_options();
+    opts_parse(argc, argv);
+
     /* Getting the query. */
-    if(argc <= 1)
-        die("No query string.\n");
     query_str[0] = '\0';
     length = QUERY_LENGTH;
-    for(i = 1; i < argc; ++i) {
-        strncat(query_str, argv[i], length);
-        length -= strlen(argv[i]);
+    while((str = opts_next())) {
+        strncat(query_str, str, length);
+        length -= strlen(str);
         strncat(query_str, " ", length);
         --length;
     }
 
     /* Getting the maildir. */
-    maildir = getenv("MAILDIR");
-    if(!maildir)
-        die("$MAILDIR is not set.\n");
+    maildir = opts_as_string("maildir");
+    if(!maildir) {
+        maildir = getenv("MAILDIR");
+        if(!maildir)
+            die("$MAILDIR is not set.\n");
+    }
 
     /* Opening the database. */
     status = notmuch_database_open(maildir,
@@ -181,6 +199,7 @@ int main(int argc, char *argv[])
     }
 
     /* Clearing memory. */
+    opts_close();
     notmuch_query_destroy(query);
     notmuch_database_close(db);
 
