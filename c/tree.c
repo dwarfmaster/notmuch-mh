@@ -70,6 +70,9 @@ static void print_message(notmuch_message_t* msg, int new,
     notmuch_messages_t* subs;
     subs = notmuch_message_get_replies(msg);
 
+    if(opts_as_bool("mid"))
+        printf("%s\t", notmuch_message_get_message_id(msg));
+
     for(i = 0; dec > 0 && i < dec - 1; ++i) {
         printf("%s", symbols[symbs[i]]);
         for(j = 0; j < COLUMN_WIDTH; ++j)
