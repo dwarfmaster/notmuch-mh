@@ -1,5 +1,5 @@
-PROGS=tree.prog
-OBJS=
+PROGS=tree.prog opts_test.prog
+OBJS=opts.o
 CFLAGS=-Wall -Wextra -g
 LDFLAGS=-lnotmuch
 CC=gcc
