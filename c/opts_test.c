@@ -5,13 +5,14 @@
 int main(int argc, char *argv[])
 {
     option_t opts[] = {
-        {"maildir", 'm', 1},
-        {"home",    'h', 1},
+        {"maildir", 'M', 1},
+        {"home",    'H', 1},
         {"verbose", 'v', 1},
         {"mute",    'm', 0},
         {"help",     0 , 0},
         {NULL,       0,  0},
     };
+    const char* str;
 
     if(!opts_set(opts))
         return 1;
@@ -23,6 +24,10 @@ int main(int argc, char *argv[])
     printf("verbose => %i\n", opts_as_int("verbose"));
     printf("mute    => %i\n", opts_as_bool("mute"));
     printf("help    => %i\n", opts_as_bool("help"));
+
+    while((str = opts_next())) {
+        printf(" - %s\n", str);
+    }
 
     opts_close();
     return 0;
