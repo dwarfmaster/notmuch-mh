@@ -61,6 +61,27 @@ static const char* print_line(notmuch_message_t* msg, const char* prevsubj)
     return subject;
 }
 
+static int count_subs(notmuch_message_t* msg)
+{
+    int match = opts_as_bool("matched");
+    notmuch_messages_t* subs;
+    int count;
+
+    count = 0;
+    for(subs = notmuch_message_get_replies(msg);
+            notmuch_messages_valid(subs);
+            notmuch_messages_move_to_next(subs)) {
+        msg = notmuch_messages_get(subs);
+        if(!match || notmuch_message_get_flag(msg, NOTMUCH_MESSAGE_FLAG_MATCH))
+            ++count;
+        else
+            count += count_subs(msg);
+    }
+    notmuch_messages_destroy(subs);
+
+    return count;
+}
+
 static void print_message(notmuch_message_t* msg, int new,
         int symbs[MAX_DEPTH], size_t dec, const char* prevsubj)
 {
@@ -70,47 +91,58 @@ static void print_message(notmuch_message_t* msg, int new,
     notmuch_messages_t* subs;
     subs = notmuch_message_get_replies(msg);
 
-    if(opts_as_bool("mid"))
-        printf("%s\t", notmuch_message_get_message_id(msg));
+    if(!opts_as_bool("matched")
+            || notmuch_message_get_flag(msg, NOTMUCH_MESSAGE_FLAG_MATCH))
+    {
+        if(opts_as_bool("mid"))
+            printf("%s\t", notmuch_message_get_message_id(msg));
 
-    for(i = 0; dec > 0 && i < dec - 1; ++i) {
-        printf("%s", symbols[symbs[i]]);
-        for(j = 0; j < COLUMN_WIDTH; ++j)
-            printf(" ");
-    }
-    
-    if(dec >= 1) {
-        printf("%s", symbols[new]);
-        for(j = 0; j < COLUMN_WIDTH; ++j)
-            printf("%s", symbols[1]);
-    }
-
-    if(subs)
-        printf("%s", symbols[4]);
-    else
-        printf("%s", symbols[1]);
-
-    printf("%s", symbols[5]);
-    subject = print_line(msg, prevsubj);
-    
-    symbs[dec] = 0;
-    cont = 1;
-    next = 3;
-    if(!notmuch_messages_valid(subs))
-        cont = 0;
-
-    while(cont) {
-        msg = notmuch_messages_get(subs);
-        notmuch_messages_move_to_next(subs);
-        if(!notmuch_messages_valid(subs)) {
-            cont = 0;
-            symbs[dec] = 6;
-            next = 2;
+        for(i = 0; dec > 0 && i < dec - 1; ++i) {
+            printf("%s", symbols[symbs[i]]);
+            for(j = 0; j < COLUMN_WIDTH; ++j)
+                printf(" ");
         }
-        print_message(msg, next, symbs, dec + 1, subject);
-    }
 
-    notmuch_messages_destroy(subs);
+        if(dec >= 1) {
+            printf("%s", symbols[new]);
+            for(j = 0; j < COLUMN_WIDTH; ++j)
+                printf("%s", symbols[1]);
+        }
+
+        if(count_subs(msg) > 0)
+            printf("%s", symbols[4]);
+        else
+            printf("%s", symbols[1]);
+
+        printf("%s", symbols[5]);
+        subject = print_line(msg, prevsubj);
+
+        symbs[dec] = 0;
+        cont = 1;
+        next = 3;
+        if(!notmuch_messages_valid(subs))
+            cont = 0;
+
+        while(cont) {
+            msg = notmuch_messages_get(subs);
+            notmuch_messages_move_to_next(subs);
+            if(!notmuch_messages_valid(subs)) {
+                cont = 0;
+                symbs[dec] = 6;
+                next = 2;
+            }
+            print_message(msg, next, symbs, dec + 1, subject);
+        }
+
+        notmuch_messages_destroy(subs);
+    }
+    else {
+        for(; notmuch_messages_valid(subs);
+                notmuch_messages_move_to_next(subs)) {
+            msg = notmuch_messages_get(subs);
+            print_message(msg, new, symbs, dec, prevsubj);
+        }
+    }
 }
 
 static void print_thread(notmuch_thread_t* th)
@@ -134,6 +166,7 @@ static void set_options()
         {"maildir", 0, 1},
         {"format",  0, 1},
         {"mid",     0, 0},
+        {"matched", 0, 0},
         {NULL,      0, 0}
     };
     opts_set(opts);
@@ -145,7 +178,6 @@ int main(int argc, char *argv[])
     const char* str;
     char query_str[QUERY_LENGTH];
     size_t length;
-    int i;
     notmuch_database_t* db;
     notmuch_status_t status;
     notmuch_query_t* query;
