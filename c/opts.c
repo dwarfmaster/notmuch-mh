@@ -37,6 +37,7 @@ int opts_set(option_t* opts)
                 ++shortln;
         }
     }
+    shortln += 2;
     number = i;
 
     opts_options = malloc((number + 1) * sizeof(struct internal_option_t));
@@ -53,7 +54,8 @@ int opts_set(option_t* opts)
         opts_shorts[0] = '\0';
     }
 
-    pos = 0;
+    pos = 1;
+    opts_shorts[0] = '-';
     for(i = 0; i < number; ++i) {
         opts_options[i].opt   = opts[i];
         opts_options[i].value = NULL;
@@ -73,6 +75,10 @@ int opts_set(option_t* opts)
             }
         }
     }
+    if(pos < shortln)
+        opts_shorts[pos] = '\0';
+    else
+        opts_shorts[shortln - 1] = '\0';
 
     memset(&opts_gnu_options[number], 0, sizeof(struct option));
     memset(&opts_options[number], 0, sizeof(struct internal_option_t));
@@ -103,13 +109,14 @@ int opts_parse(int argc, char *argv[])
 {
     int opt_id;
     int c;
+    size_t capa;
     struct internal_option_t* opt;
 
-    opts_argc = argc;
-    opts_argv = malloc(sizeof(char*) * argc);
+    opts_argc = 0;
+    opts_argv = malloc(sizeof(char*) * 10);
     if(!opts_argv)
         return 0;
-    memcpy(opts_argv, argv, sizeof(char*) * argc);
+    capa = 10;
 
     if(!opts_gnu_options)
         return 0;
@@ -124,6 +131,16 @@ int opts_parse(int argc, char *argv[])
                 opt->value = optarg;
             opt->has = 1;
         }
+        else if(c == 1) {
+            if(!optarg)
+                continue;
+            opts_argv[opts_argc] = optarg;
+            ++opts_argc;
+            if(opts_argc >= capa) {
+                capa += 10;
+                opts_argv = realloc(opts_argv, capa);
+            }
+        }
         else if(c != '?') {
             opt = opts_opt_from_short((char)c);
             if(!opt)
@@ -134,7 +151,7 @@ int opts_parse(int argc, char *argv[])
         }
     }
 
-    opts_first_nonarg = optind;
+    opts_first_nonarg = 0;
     free(opts_gnu_options);
     opts_gnu_options = NULL;
     return 1;
