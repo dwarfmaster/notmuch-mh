@@ -32,6 +32,28 @@ static const char* ascii_symbols[] = {
 };
 static const char** symbols;
 
+enum {
+    COLOR_RED,
+    COLOR_GREEN,
+    COLOR_YELLOW,
+    COLOR_BLUE,
+    COLOR_MAGENTA,
+    COLOR_CYAN,
+    COLOR_WHITE,
+    COLOR_CLEAR,
+    COLOR_NB
+};
+static const char* colors[COLOR_NB] = {
+    "\x1b[31m",
+    "\x1b[32m",
+    "\x1b[33m",
+    "\x1b[34m",
+    "\x1b[35m",
+    "\x1b[36m",
+    "\x1b[37m",
+    "\x1b[0m",
+};
+
 static void die(const char* fmt, ...)
 {
     va_list args;
@@ -66,10 +88,19 @@ static const char* print_line(notmuch_message_t* msg, const char* prevsubj)
     if(length < QUERY_LENGTH)
         tags[QUERY_LENGTH - length - 1] = '\0';
 
-    if(strcmp(subject, prevsubj) == 0)
-        printf(" \x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", from, tags);
-    else
-        printf("\x1b[36m\x1b[1m%s \x1b[0m\x1b[32m[%s] \x1b[31m[%s]\x1b[0m\n", subject, from, tags);
+    if(strcmp(subject, prevsubj) == 0) {
+        printf(" %s[%s] %s[%s]%s\n",
+                colors[COLOR_GREEN], from,
+                colors[COLOR_RED],   tags,
+                colors[COLOR_CLEAR]);
+    }
+    else {
+        printf("%s%s %s[%s] %s[%s]%s\n",
+                colors[COLOR_CYAN],  subject,
+                colors[COLOR_GREEN], from,
+                colors[COLOR_RED],   tags,
+                colors[COLOR_CLEAR]);
+    }
     return subject;
 }
 
@@ -188,6 +219,7 @@ static void set_options()
         {"matched", 0, 0},
         {"hlmatch", 0, 0},
         {"ascii",   0, 0},
+        {"colors",  0, 0},
         {NULL,      0, 0}
     };
     opts_set(opts);
@@ -214,6 +246,12 @@ int main(int argc, char *argv[])
         symbols = ascii_symbols;
     else
         symbols = utf8_symbols;
+
+    /* Setting the colors. */
+    if(!opts_as_bool("colors")) {
+        for(length = 0; length < COLOR_NB; ++length)
+            colors[length] = "";
+    }
 
     /* Getting the query. */
     query_str[0] = '\0';
