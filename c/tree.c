@@ -10,7 +10,7 @@
 #define MAX_DEPTH    256
 #define COLUMN_WIDTH   0
 
-static const char* symbols[] = {
+static const char* utf8_symbols[] = {
     "\xe2\x94\x82", /* Vertical bar.   */
     "\xe2\x94\x80", /* Horizontal bar. */
     "\xe2\x94\x94", /* Angle.          */
@@ -20,6 +20,17 @@ static const char* symbols[] = {
     " ",            /* Empty.          */
     "\xe2\x97\x8f", /* Filled circle.  */
 };
+static const char* ascii_symbols[] = {
+    "|",  /* Vertical bar.   */
+    "-",  /* Horizontal bar. */
+    "\\", /* Angle.          */
+    "|",  /* New branch.     */
+    "-",  /* New sub-branch. */
+    ">",  /* Arrow.          */
+    " ",  /* Empty.          */
+    "X",  /* Filled circle.  */
+};
+static const char** symbols;
 
 static void die(const char* fmt, ...)
 {
@@ -176,6 +187,7 @@ static void set_options()
         {"mid",     0, 0},
         {"matched", 0, 0},
         {"hlmatch", 0, 0},
+        {"ascii",   0, 0},
         {NULL,      0, 0}
     };
     opts_set(opts);
@@ -196,6 +208,12 @@ int main(int argc, char *argv[])
     /* Handling command line options. */
     set_options();
     opts_parse(argc, argv);
+
+    /* Setting the symbols. */
+    if(opts_as_bool("ascii"))
+        symbols = ascii_symbols;
+    else
+        symbols = utf8_symbols;
 
     /* Getting the query. */
     query_str[0] = '\0';
