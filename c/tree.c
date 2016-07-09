@@ -199,7 +199,17 @@ static void print_thread(notmuch_thread_t* th)
 {
     notmuch_messages_t* msgs;
     notmuch_message_t* msg;
+    const char* thread_id;
     int symbs[MAX_DEPTH];
+
+    if(opts_as_bool("thid")
+            && (thread_id = notmuch_thread_get_thread_id(th))) {
+        if(opts_as_bool("colors"))
+            printf("%s", colors[COLOR_YELLOW]);
+        printf(">> %s\n", thread_id);
+        if(opts_as_bool("colors"))
+            printf("%s", colors[COLOR_CLEAR]);
+    }
 
     for(msgs = notmuch_thread_get_toplevel_messages(th);
             notmuch_messages_valid(msgs);
@@ -216,6 +226,7 @@ static void set_options()
         {"maildir", 0, 1},
         {"format",  0, 1},
         {"mid",     0, 0},
+        {"thid",    0, 0},
         {"matched", 0, 0},
         {"hlmatch", 0, 0},
         {"ascii",   0, 0},
