@@ -192,6 +192,18 @@ int opts_as_int(const char* name)
     return ret;
 }
 
+void opts_display_help()
+{
+    printf("Options :\n");
+    size_t i;
+    for(i = 0; opts_options[i].opt.name; ++i) {
+        printf("\t%s ", opts_options[i].opt.name);
+        if(opts_options[i].opt.letter != 0)
+            printf("[%c] ", opts_options[i].opt.letter);
+        printf(": %s\n", opts_options[i].opt.desc);
+    }
+}
+
 void opts_close()
 {
     if(opts_options)

@@ -6,6 +6,7 @@ typedef struct _option_t {
     const char* name; /** The name of the option. */
     char letter;      /** The short version, or 0 if none. */
     int value;        /** Boolean : has the argument a value or is it a flag. */
+    const char* desc; /** The description of the option. */
 } option_t;
 
 /** opts must end with an option with NULL as name. */
@@ -20,6 +21,8 @@ const char* opts_as_string(const char* name);
 int opts_as_bool(const char* name);
 /** Get the value as an int. */
 int opts_as_int(const char* name);
+/** Display the list of the options with their descriptions */
+void opts_display_help();
 /** Free all memory used. */
 void opts_close();
 

@@ -223,15 +223,16 @@ static void print_thread(notmuch_thread_t* th)
 static void set_options()
 {
     option_t opts[] = {
-        {"maildir", 0, 1},
-        {"format",  0, 1},
-        {"mid",     0, 0},
-        {"thid",    0, 0},
-        {"matched", 0, 0},
-        {"hlmatch", 0, 0},
-        {"ascii",   0, 0},
-        {"colors",  0, 0},
-        {NULL,      0, 0}
+        {"help",    'h', 0, "Display help"},
+        {"maildir",  0,  1, "Set the maildir to use"},
+        {"format",   0,  1, "Format the output string"},
+        {"mid",      0,  0, "Display mails id"},
+        {"thid",     0,  0, "Display threads id"},
+        {"matched",  0,  0, "Display only messages matching the query, not their whole thread"},
+        {"hlmatch",  0,  0, "Highlight matching messages"},
+        {"ascii",    0,  0, "Use only ascii characters for tree"},
+        {"colors",   0,  0, "Enable colors"},
+        {NULL,       0,  0}
     };
     opts_set(opts);
 }
@@ -251,6 +252,12 @@ int main(int argc, char *argv[])
     /* Handling command line options. */
     set_options();
     opts_parse(argc, argv);
+
+    if(opts_as_bool("help")) {
+        opts_display_help();
+        opts_close();
+        return 0;
+    }
 
     /* Setting the symbols. */
     if(opts_as_bool("ascii"))
